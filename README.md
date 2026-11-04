@@ -1,87 +1,56 @@
-# KnowYourFinance (KYF)
+# KnowYourFinance
 
-A personal finance app that helps you understand what you earn, spend, and save — **without linking your bank account.**
+COMP 425 team project. This repository is Sujal Rao's working copy of the shared KnowYourFinance project. The existing project history is preserved.
 
-Instead of connecting to your bank (Plaid-style), you upload a CSV export of your statement. KYF parses it, automatically strips out anything that looks like an account/routing number, categorizes the transactions, and gives you a month/year income-vs-expense report. Cash spending is covered too, through manual entry — it lands in the exact same dashboard as everything else.
+## What the app does
 
-## Why no bank linking?
+KnowYourFinance helps users review income, expenses, and savings without linking a bank account. Users can import a CSV statement, enter a transaction manually, correct records, and view reports. Sensitive number patterns in transaction descriptions are redacted before later processing.
 
-Most budgeting apps ask for your bank login and keep a standing connection to your account. KYF never does. The tradeoff is explicit: you lose automatic real-time syncing, and in exchange the app is structurally incapable of leaking your bank credentials — because it never has them in the first place. See [`docs/build-log/02-statement-upload-pipeline.md`](docs/build-log/02-statement-upload-pipeline.md) for exactly how the redaction works.
+## Project folders
 
-## Project structure
+- `backend/`: Spring Boot API using Java 21.
+- `frontend/`: React interface built with Vite.
+- `docs/`: requirements, design diagrams, and development notes.
+- `.github/workflows/`: automated build workflows.
 
-```
-backend/    Spring Boot 3.3.4 / Java 21 REST API
-frontend/   React (Vite) UI
-docs/       build-log/ — plain-language documentation of every decision made, in build order
-```
+## Backend tests
 
-## Running it locally
+With Java 21 and Maven installed, run:
 
-The backend connects to a shared Supabase (hosted PostgreSQL) database, so before running it for the first time, set three environment variables with your database credentials:
-
-```bash
-export SPRING_DATASOURCE_URL="jdbc:postgresql://aws-0-us-east-1.pooler.supabase.com:5432/postgres"
-export SPRING_DATASOURCE_USERNAME="postgres.nmivkmwsxdbszuzbldyp"
-export SPRING_DATASOURCE_PASSWORD="<ask a teammate, or get it from Supabase: Project Settings > Database > Reset database password>"
+```sh
+cd backend
+mvn -B verify
 ```
 
-Put these in your shell profile (or an `.env` file your terminal loads) so you don't have to retype them every session. **Never commit the password** — it's a secret, not code, which is exactly why it's an environment variable instead of a line in `application.properties`.
+The existing backend suite was run on November 4, 2026 at revision `f89fd4722035a571622e002588c64f0726168144`: **52 tests passed, 0 failures, 0 errors, 0 skipped**. The build also completed successfully. These results cover the existing automated tests; browser workflows, Docker startup, and the hosted database still need separate checks.
 
-Once those are set, one command starts both the backend and the frontend:
+## Running the app
 
-```bash
-./start.sh
-```
+The backend uses Supabase PostgreSQL. Set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD` in your local environment using the team's approved development database settings. Keep passwords and API keys out of Git.
 
-Press Ctrl+C once to stop both. The first time you run it, install frontend dependencies first:
+Start the backend:
 
-```bash
-cd frontend && npm install && cd ..
-./start.sh
-```
-
-If you'd rather run them separately (two terminals):
-
-```bash
-# Terminal 1: backend (http://localhost:8080)
+```sh
 cd backend
 mvn spring-boot:run
+```
 
-# Terminal 2: frontend (http://localhost:5173)
+Start the frontend in a second terminal:
+
+```sh
 cd frontend
+npm ci
 npm run dev
 ```
 
-Note that neither of these runs as a background service. Shutting down or restarting your computer stops both processes, same as closing any other program, so you'll need to run `./start.sh` again next time. That's expected, and it has nothing to do with data persistence — the data now lives in Supabase, not on your machine, so it survives whether or not the backend is running.
+The default development addresses are `http://localhost:8080` for the API and `http://localhost:5173` for the frontend.
 
-## Core features
+## Current milestone
 
-- **Statement upload** (`POST /api/statements/upload`) — CSV in, redacted + categorized transactions out
-- **Manual entry** (`POST /api/transactions`) — for cash spending, which never appears on a bank statement
-- **Monthly report** (`GET /api/dashboard/report`) — income, expenses, net savings, and a category breakdown for any month/year you pick
-- **Transaction list** — every transaction on file, statement-imported or manual, in one place
+Milestone 4 covers the Core MVP and Docker setup, due November 13, 2026. Remaining verification includes the exact CSV scenarios through the running app, container connectivity, persistence after restart, and report checks. Task assignments in workday documents are plans until backed by completed work and evidence.
 
-## Documentation
+## Project notes
 
-Everything is documented as it was built, in order, in [`docs/build-log/`](docs/build-log/):
+The current MVP focuses on CSV imports, manual transactions, transaction corrections, categorization, and reports. Authentication, budgets, recurring-charge detection, bank linking, report export, and multiple currencies remain outside the approved MVP scope. Hosted categorization provider adapters are described in the design and should not be assumed complete from that description alone.
 
-1. [Backend foundations](docs/build-log/01-backend-foundations.md) — project scaffold, the `Transaction` model, why `BigDecimal`/enums
-2. [Statement upload pipeline](docs/build-log/02-statement-upload-pipeline.md) — the redaction mechanism, in full
-3. [Minimal frontend](docs/build-log/03-minimal-frontend.md) — the React UI
-4. [Error handling](docs/build-log/04-error-handling.md) — clean API error responses
-5. [First tests](docs/build-log/05-first-tests.md) — unit and controller-level tests
-
-## Requirements and design
-
-- [Milestone 2: Software Requirements Specification](docs/requirements/milestone-2-srs.md)
-- [Milestone 3: Formal Analysis and Design Document](docs/design/milestone-3-design.md)
-- [Mermaid diagram sources](docs/diagrams/) (one file per diagram, kept in sync with the design document)
-
-## Course context
-
-This is a COMP 425 (Software Engineering) semester project at SMSU, following a waterfall model across six milestones (Opportunity Study → Requirements Spec → Design Doc → MVP/Docker → Testing/CI-CD → Final Showcase). It's also being used as a personal learning project — every technical decision is documented in plain language, not just implemented.
-
-## Status
-
-No authentication yet (deliberate — dashboard and core features came first). No PostgreSQL/Docker/CI-CD yet (later milestones). See each build-log entry's "what's intentionally missing" section for the full honest list.
+See `docs/requirements/`, `docs/design/`, `docs/diagrams/`, and `docs/build-log/` for the shared project documentation.
