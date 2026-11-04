@@ -1,0 +1,43 @@
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+/backend/src/main/resources/application-local.properties
+/backend/src/main/resources/application-local.yml
+/backend/src/main/resources/application-local.yaml
+
+# Java / Maven
+**/target/
+*.class
+*.war
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# React / Node
+**/node_modules/
+**/dist/
+**/.vite/
+**/coverage/
+*.tsbuildinfo
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# IDE settings
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
